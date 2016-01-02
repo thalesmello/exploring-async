@@ -126,6 +126,38 @@ timer = setInterval(() => {
 
 ## Coroutines
 
+The coroutines technique is makes a smart use of the new generator feature
+in the ES6 specification. Generators make it possible to suspend and resume
+function execution. Some libraries such as Bluebird make use of it in order
+to provide a convenient way to await the return of promises. Our previous
+example become a lot simpler once we make use of the coroutine feature.
+
+```js
+var Promise = require("bluebird"),
+    delay = Promise.delay,
+    timer = setInterval(intervalLoop, 500),
+    areThingsComplicated = false;
+
+Promise.coroutine(complicatedBehaviour)();
+
+function* complicatedBehaviour() {
+    yield delay(2000);
+    console.log("Things can get...");
+    yield delay(1000);
+    areThingsComplicated = true;
+    console.log("complicated.");
+    yield delay(1000);
+    clearInterval(timer);
+}
+
+function intervalLoop() {
+    if(areThingsComplicated) {
+        console.log("Oh no!");
+    } else {
+        console.log("Not much?");
+    }
+}
+```
 
 ## Async & Await
 

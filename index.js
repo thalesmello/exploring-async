@@ -71,24 +71,53 @@
 //     })
 //     .then(value => console.log(value));
 
-var areThingsComplicated = false,
-    timer;
+// var areThingsComplicated = false,
+//     timer;
+//
+// function timeout(time, callback) {
+//     return new Promise(resolve => setTimeout(() => resolve(callback()), time));
+// }
+//
+// timeout(2000, () => console.log("Things can get..."))
+//     .then(() => timeout(1000, () => {
+//         console.log("complicated.");
+//         areThingsComplicated = true;
+//     }))
+//     .then(() => timeout(1000, () => clearInterval(timer)));
+//
+// timer = setInterval(() => {
+//     if(areThingsComplicated) {
+//         console.log("Not much though.");
+//     } else {
+//         console.log("What?");
+//     }
+// }, 500);
 
-function timeout(time, callback) {
-    return new Promise(resolve => setTimeout(() => resolve(callback()), time));
+// -----------------------------
+// Coroutines
+// -----------------------------
+
+var Promise = require("bluebird"),
+    delay = Promise.delay,
+    timer = setInterval(intervalLoop, 500),
+    areThingsComplicated = false;
+
+Promise.coroutine(complicatedBehaviour)();
+
+function* complicatedBehaviour() {
+    yield delay(2000);
+    console.log("Things can get...");
+    yield delay(1000);
+    areThingsComplicated = true;
+    console.log("complicated.");
+    yield delay(1000);
+    clearInterval(timer);
 }
 
-timeout(2000, () => console.log("Things can get..."))
-    .then(() => timeout(1000, () => {
-        console.log("complicated.");
-        areThingsComplicated = true;
-    }))
-    .then(() => timeout(1000, () => clearInterval(timer)));
-
-timer = setInterval(() => {
+function intervalLoop() {
     if(areThingsComplicated) {
-        console.log("Not much though.");
+        console.log("Oh no!");
     } else {
-        console.log("What?");
+        console.log("Not much?");
     }
-}, 500);
+}
