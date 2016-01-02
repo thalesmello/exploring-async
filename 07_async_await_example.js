@@ -7,13 +7,24 @@ var timer = setInterval(intervalLoop, 500),
 complicatedBehaviour();
 
 async function complicatedBehaviour() {
-    await delay(2000);
+    let value;
+
+    value = await delay(2000, "First Return Value");
+    logArgument(value);
     console.log("Things can get...");
-    await delay(1000);
+
+    value = await delay(1000, "Second Return Value");
+    logArgument(value);
     areThingsComplicated = true;
     console.log("complicated.");
-    await delay(1000);
+
+    value = await delay(1000, "Third Return Value");
+    logArgument(value);
     clearInterval(timer);
+}
+
+function logArgument(value) {
+    console.log("ARGUMENT -> " + value);
 }
 
 function intervalLoop() {
@@ -24,10 +35,10 @@ function intervalLoop() {
     }
 }
 
-function delay(time) {
+function delay(time, value) {
     return new Promise(handle);
 
     function handle(resolve) {
-        setTimeout(resolve, time);
+        return setTimeout(() => resolve(value), time);
     }
 }
