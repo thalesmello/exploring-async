@@ -1,21 +1,47 @@
 var areThingsComplicated = false,
-    timer;
+    timer = setInterval(intervalLoop, 500);
 
-function timeout(time, callback) {
-    return new Promise(resolve => setTimeout(() => resolve(callback()), time));
+delay(2000, "First Return Value")
+    .then(debug(thingsCanGet))
+    .then(() => delay(1000, "Second Return Value"))
+    .then(debug(complicated))
+    .then(() => delay(1000, "Third Return Value"))
+    .then(debug(breakLoop));
+
+function thingsCanGet(value) {
+    console.log("Things can get...");
 }
 
-timeout(2000, () => console.log("Things can get..."))
-    .then(() => timeout(1000, () => {
-        console.log("complicated.");
-        areThingsComplicated = true;
-    }))
-    .then(() => timeout(1000, () => clearInterval(timer)));
+function complicated(value) {
+    console.log("complicated");
+    areThingsComplicated = true;
+}
 
-timer = setInterval(() => {
+function breakLoop(value) {
+    clearInterval(timer);
+}
+
+function intervalLoop() {
     if(areThingsComplicated) {
         console.log("Not much though.");
     } else {
         console.log("What?");
     }
-}, 500);
+}
+
+function debug(func) {
+    return funcWithDebug;
+
+    function funcWithDebug(value) {
+        console.log("ARGUMENT -> " + value);
+        func(value);
+    }
+}
+
+function delay(time, value) {
+    return new Promise(handle);
+
+    function handle(resolve) {
+        return setTimeout(() => resolve(value), time);
+    }
+}

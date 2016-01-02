@@ -6,13 +6,24 @@ var Promise = require("bluebird"),
 Promise.coroutine(complicatedBehaviour)();
 
 function* complicatedBehaviour() {
-    yield delay(2000);
+    var value;
+
+    value = yield delay(2000, "First Return Value");
+    logArgument(value);
     console.log("Things can get...");
-    yield delay(1000);
+
+    value = yield delay(1000, "Second Return Value");
+    logArgument(value);
     areThingsComplicated = true;
     console.log("complicated.");
-    yield delay(1000);
+
+    value = yield delay(1000, "Third Return Value");
+    logArgument(value);
     clearInterval(timer);
+}
+
+function logArgument(value) {
+    console.log("ARGUMENT -> " + value);
 }
 
 function intervalLoop() {
