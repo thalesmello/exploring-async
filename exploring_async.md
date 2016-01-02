@@ -152,15 +152,45 @@ function* complicatedBehaviour() {
 
 function intervalLoop() {
     if(areThingsComplicated) {
-        console.log("Oh no!");
+        console.log("Not much");
     } else {
-        console.log("Not much?");
+        console.log("What?");
     }
 }
 ```
 
 ## Async & Await
 
+```js
+var timer = setInterval(intervalLoop, 500),
+    areThingsComplicated = false;
+
+async function complicatedBehaviour() {
+    await delay(2000);
+    console.log("Things can get...");
+    await delay(1000);
+    areThingsComplicated = true;
+    console.log("complicated.");
+    await delay(1000);
+    clearInterval(timer);
+}
+
+function intervalLoop() {
+    if(areThingsComplicated) {
+        console.log("Not much");
+    } else {
+        console.log("What?");
+    }
+}
+
+function delay(time) {
+    return new Promise(handle);
+
+    function handle(resolve) {
+        setTimeout(resolve, time);
+    }
+}
+```
 
 ## Reactive Extensions
 
