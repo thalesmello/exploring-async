@@ -1,0 +1,17 @@
+{
+  "name": "exploring-async",
+  "version": "0.0.1",
+  "description": "Code to explore the different async techniques in JavaScript",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Thales Mello",
+  "license": "ISC",
+  "dependencies": {
+    "babel": "^6.3.26",
+    "bluebird": "^3.1.1",
+    "js-csp": "^0.5.0",
+    "rx": "^4.0.7"
+  }
+}
