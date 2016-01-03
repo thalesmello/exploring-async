@@ -1,20 +1,38 @@
-var areThingsComplicated = false,
-    timer;
+var aBootTime = 0;
+    bBootTime = 1000;
+    queueCallback = null,
+    serverHandler = null;
 
+console.log("A: Booting up system...")
 setTimeout(() => {
-    console.log("Things can get...");
+    console.log("A: Checking network connection");
     setTimeout(() => {
-        console.log("complicated.");
+        console.log("A: Request complex computation");
         areThingsComplicated = true;
 
-        setTimeout(() => clearTimeout(timer), 1000);
-    }, 1000);
-}, 2000);
+        sendRequest(value => {
+            console.log("A: Computation returned " + value);
+        });
+    }, 500);
+}, aBootTime);
 
-timer = setInterval(() => {
-    if(areThingsComplicated) {
-        console.log("Oh no!");
-    } else {
-        console.log("What?");
+console.log("B: Booting up system...")
+setTimeout(() => {
+    console.log("B: Server up and running");
+    serverHandler = (callback) => {
+        console.log("B: Starting heavy computation");
+        setTimeout(() => callback(42), 2000)
     }
-}, 500);
+    if (queueCallback) {
+        serverHandler(queueCallback);
+        queueCallback = null;
+    }
+}, bBootTime);
+
+function sendRequest(callback) {
+    if(serverHandler) {
+        serverHandler(callback);
+    } else {
+        queueCallback = callback;
+    }
+}
