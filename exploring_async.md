@@ -16,62 +16,100 @@ trying to make more complex programs, which leads to the frequently called
 callback hell.
 
 ```js
-var areThingsComplicated = false,
-    timer;
+var aBootTime = 1000,
+    bBootTime = 1000,
+    queueCallback = null,
+    serverHandler = null;
 
+console.log("A: Booting up system...")
 setTimeout(() => {
-    console.log("Things can get...");
+    console.log("A: Checking network connection");
     setTimeout(() => {
-        console.log("complicated.");
-        areThingsComplicated = true;
+        console.log("A: Request complex computation");
 
-        setTimeout(() => clearTimeout(timer), 1000);
-    }, 1000);
-}, 2000);
+        sendRequest(value => {
+            console.log("A: Computation returned " + value);
+        });
+    }, 500);
+}, aBootTime);
 
-timer = setInterval(() => {
-    if(areThingsComplicated) {
-        console.log("Oh no!");
-    } else {
-        console.log("What?");
+console.log("B: Booting up system...")
+setTimeout(() => {
+    console.log("B: Server up and running");
+    serverHandler = (callback) => {
+        console.log("B: Starting heavy computation");
+        setTimeout(() => callback(42), 2000)
     }
-}, 500);
+    if (queueCallback) {
+        serverHandler(queueCallback);
+        queueCallback = null;
+    }
+}, bBootTime);
+
+function sendRequest(callback) {
+    if(serverHandler) {
+        serverHandler(callback);
+    } else {
+        queueCallback = callback;
+    }
+}
 ```
 
 We can improve the situation here if we used named functions to control the flow.
 
 ```js
-var areThingsComplicated = false,
-    timer = setInterval(intervalLoop, 500);
+var aBootTime = 1000,
+    bBootTime = 1000,
+    queueCallback = null,
+    serverHandler = null;
 
-startTimeout();
+serverA();
+serverB();
 
-function startTimeout() {
-    setTimeout(firstTimeout, 2000);
+function serverA() {
+    console.log("A: Booting up system...");
+    setTimeout(checkNetwork, aBootTime);
+
+    function checkNetwork() {
+        console.log("A: Checking network connection");
+        setTimeout(sendRequest, 500);
+    }
+
+    function sendRequest() {
+        console.log("A: Request complex computation");
+        sendNetworkRequest(callback);
+    }
+
+    function callback(value) {
+        console.log("A: Computation returned " + value);
+    }
 }
 
-function firstTimeout() {
-    console.log("Things can get...");
+function serverB() {
+    console.log("B: Booting up system...")
+    setTimeout(listenRequests, bBootTime);
 
-    setTimeout(secondTimeout, 1000);
+    function listenRequests() {
+        console.log("B: Server up and running");
+        serverHandler = handler;
+
+        if (queueCallback) {
+            serverHandler(queueCallback);
+            queueCallback = null;
+        }
+    }
+
+    function handler(callback) {
+        console.log("B: Starting heavy computation");
+        setTimeout(() => callback(42), 2000)
+    }
 }
 
-function secondTimeout() {
-    console.log("complicated.");
-    areThingsComplicated = true;
-
-    setTimeout(clearTimerInterval, 1000);
-}
-
-function clearTimerInterval() {
-    clearTimeout(timer);
-}
-
-function intervalLoop() {
-    if(areThingsComplicated) {
-        console.log("Oh no!");
+function sendNetworkRequest(callback) {
+    if(serverHandler) {
+        serverHandler(callback);
     } else {
-        console.log("What?");
+        queueCallback = callback;
     }
 }
 ```
@@ -101,27 +139,60 @@ The advantage of chaining callbacks this way is that it maintains a single
 indentation level.
 
 ```js
-var areThingsComplicated = false,
-    timer;
+var Promise = require("bluebird"),
+    aBootTime = 1000,
+    bBootTime = 1000,
+    promiseB;
 
-function timeout(time, callback) {
-    return new Promise(resolve => setTimeout(() => resolve(callback()), time));
+serverA();
+promiseB = serverB();
+
+function serverA() {
+    console.log("A: Booting up system...");
+    return Promise.delay(aBootTime)
+        .then(checkNetwork)
+        .delay(500)
+        .then(sendRequest);
+
+    setTimeout(checkNetwork, aBootTime);
+
+    function checkNetwork() {
+        console.log("A: Checking network connection");
+    }
+
+    function sendRequest() {
+        console.log("A: Request complex computation");
+        sendNetworkRequest(callback);
+    }
+
+    function callback(value) {
+        console.log("A: Computation returned " + value);
+    }
 }
 
-timeout(2000, () => console.log("Things can get..."))
-    .then(() => timeout(1000, () => {
-        console.log("complicated.");
-        areThingsComplicated = true;
-    }))
-    .then(() => timeout(1000, () => clearInterval(timer)));
+function serverB() {
+    console.log("B: Booting up system...")
 
-timer = setInterval(() => {
-    if(areThingsComplicated) {
-        console.log("Not much though.");
-    } else {
-        console.log("What?");
+    return Promise.delay(bBootTime).then(listenRequests);
+
+    function listenRequests() {
+        console.log("B: Server up and running");
+        return serverHandler;
     }
-}, 500);
+
+    function serverHandler(callback) {
+        console.log("B: Starting heavy computation");
+        Promise.delay(2000).then(answerRequest);
+
+        function answerRequest() {
+            callback(42);
+        }
+    }
+}
+
+function sendNetworkRequest(callback) {
+    promiseB.then(serverHandler => serverHandler(callback));
+}
 ```
 
 ## Coroutines
@@ -135,26 +206,36 @@ example become a lot simpler once we make use of the coroutine feature.
 ```js
 var Promise = require("bluebird"),
     delay = Promise.delay,
-    timer = setInterval(intervalLoop, 500),
-    areThingsComplicated = false;
+    promisify = Promise.promisify,
+    coroutine = Promise.coroutine,
+    aBootTime = 1000,
+    bBootTime = 1000,
+    promiseB;
 
-Promise.coroutine(complicatedBehaviour)();
+coroutine(serverA)();
+promiseB = coroutine(serverB)();
 
-function* complicatedBehaviour() {
-    yield delay(2000);
-    console.log("Things can get...");
-    yield delay(1000);
-    areThingsComplicated = true;
-    console.log("complicated.");
-    yield delay(1000);
-    clearInterval(timer);
+function* serverA() {
+    console.log("A: Booting up system...");
+    yield delay(aBootTime);
+    console.log("A: Checking network connection");
+    yield delay(500);
+    console.log("A: Request complex computation");
+    var serverHandler = yield promiseB;
+    var value = yield serverHandler();
+    console.log("A: Computation returned " + value);
 }
 
-function intervalLoop() {
-    if(areThingsComplicated) {
-        console.log("Not much");
-    } else {
-        console.log("What?");
+function* serverB() {
+    console.log("B: Booting up system...")
+    yield delay(bBootTime);
+    console.log("B: Server up and running");
+    return promisify(coroutine(serverHandler));
+
+    function* serverHandler(callback) {
+        console.log("B: Starting heavy computation");
+        yield delay(2000);
+        callback(null, 42);
     }
 }
 ```
@@ -162,41 +243,154 @@ function intervalLoop() {
 ## Async & Await
 
 ```js
-var timer = setInterval(intervalLoop, 500),
-    areThingsComplicated = false;
+var Promise = require("bluebird"),
+    delay = Promise.delay,
+    promisify = Promise.promisify,
+    coroutine = Promise.coroutine,
+    aBootTime = 1000,
+    bBootTime = 1000,
+    promiseB;
 
-async function complicatedBehaviour() {
-    await delay(2000);
-    console.log("Things can get...");
-    await delay(1000);
-    areThingsComplicated = true;
-    console.log("complicated.");
-    await delay(1000);
-    clearInterval(timer);
+serverA();
+promiseB = serverB();
+
+async function serverA() {
+    console.log("A: Booting up system...");
+    await delay(aBootTime);
+    console.log("A: Checking network connection");
+    await delay(500);
+    console.log("A: Request complex computation");
+    var serverHandler = await promiseB;
+    var value = await serverHandler();
+    console.log("A: Computation returned " + value);
 }
 
-function intervalLoop() {
-    if(areThingsComplicated) {
-        console.log("Not much");
-    } else {
-        console.log("What?");
-    }
-}
+async function serverB() {
+    console.log("B: Booting up system...")
+    await delay(bBootTime);
+    console.log("B: Server up and running");
+    return promisify(serverHandler);
 
-function delay(time) {
-    return new Promise(handle);
-
-    function handle(resolve) {
-        setTimeout(resolve, time);
+    async function serverHandler(callback) {
+        console.log("B: Starting heavy computation");
+        await delay(2000);
+        callback(null, 42);
     }
 }
 ```
 
 ## Reactive Extensions
 
+```js
+var Rx = require("rx");
+
+Rx.Observable
+    .interval(500)
+    .map(x => x + 1)
+    .takeWhile(x => x <= 3)
+    .concat(Rx.Observable.of("World"))
+    .subscribe(x => console.log("Hello " + x + "!"));
+```
+
+```js
+var Promise = require("bluebird"),
+    Rx = require("rx"),
+    aBootTime = 1000,
+    bBootTime = 1000,
+    observableB;
+
+serverA();
+observableB = serverB();
+
+function serverA() {
+    console.log("A: Booting up system...");
+    return Rx.Observable.timer(aBootTime)
+        .do(checkNetwork)
+        .delay(500)
+        .flatMap(sendRequest)
+        .subscribe(observer);
+
+    setTimeout(checkNetwork, aBootTime);
+
+    function checkNetwork() {
+        console.log("A: Checking network connection");
+    }
+
+    function sendRequest() {
+        console.log("A: Request complex computation");
+        return Rx.Observable.fromCallback(sendNetworkRequest)();
+    }
+
+    function observer(value) {
+        console.log("A: Computation returned " + value);
+    }
+}
+
+function serverB() {
+    console.log("B: Booting up system...")
+    var subject = new Rx.AsyncSubject();
+    Rx.Observable.timer(bBootTime).map(listenRequests).subscribe(subject);
+    return subject;
+
+    function listenRequests() {
+        console.log("B: Server up and running");
+        return serverHandler;
+    }
+
+    function serverHandler(callback) {
+        console.log("B: Starting heavy computation");
+        Rx.Observable.timer(2000).subscribe(answerRequest);
+
+        function answerRequest() {
+            callback(42);
+        }
+    }
+}
+
+function sendNetworkRequest(callback) {
+    observableB.subscribe(serverHandler => serverHandler(callback));
+}
+```
 
 ## Communicating Sequential Processes
 
+```js
+var aBootTime = 1000,
+    bBootTime = 1000,
+    csp = require("js-csp"),
+    timeout = csp.timeout,
+    network = csp.chan();
+
+csp.go(serverA);
+csp.go(serverB);
+
+function* serverA() {
+    console.log("A: Booting up system...");
+    yield timeout(aBootTime);
+    console.log("A: Checking network connection");
+    yield timeout(500);
+    console.log("A: Request complex computation");
+    yield csp.put(network, "request");
+    var value = yield csp.take(network);
+    console.log("A: Computation returned " + value);
+    network.close();
+}
+
+function* serverB() {
+    console.log("B: Booting up system...")
+    yield timeout(bBootTime);
+    console.log("B: Server up and running");
+    while(true) {
+        var request = yield csp.take(network);
+        if(request === csp.CLOSED) {
+            break;
+        }
+        console.log("B: Starting heavy computation");
+        yield timeout(2000);
+        yield csp.put(network, 42);
+    };
+}
+```
 
 ## Summary
 
