@@ -1,4 +1,4 @@
-var aBootTime = 0;
+var aBootTime = 1000;
     bBootTime = 1000;
     queueCallback = null,
     serverHandler = null;
@@ -8,7 +8,6 @@ setTimeout(() => {
     console.log("A: Checking network connection");
     setTimeout(() => {
         console.log("A: Request complex computation");
-        areThingsComplicated = true;
 
         sendRequest(value => {
             console.log("A: Computation returned " + value);

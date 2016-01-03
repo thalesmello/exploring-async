@@ -1,33 +1,54 @@
-var areThingsComplicated = false,
-    timer = setInterval(intervalLoop, 500);
+var aBootTime = 1000;
+    bBootTime = 1000;
+    queueCallback = null,
+    serverHandler = null;
 
-startTimeout();
+serverA();
+serverB();
 
-function startTimeout() {
-    setTimeout(firstTimeout, 2000);
+function serverA() {
+    console.log("A: Booting up system...")
+    setTimeout(checkNetwork, aBootTime);
+
+    function checkNetwork() {
+        console.log("A: Checking network connection");
+        setTimeout(sendRequest, 500);
+    }
+
+    function sendRequest() {
+        console.log("A: Request complex computation");
+        sendNetworkRequest(callback);
+
+        function callback(value) {
+            console.log("A: Computation returned " + value);
+        }
+    }
 }
 
-function firstTimeout() {
-    console.log("Things can get...");
+function serverB() {
+    console.log("B: Booting up system...")
+    setTimeout(listenRequests, bBootTime);
 
-    setTimeout(secondTimeout, 1000);
+    function listenRequests() {
+        console.log("B: Server up and running");
+        serverHandler = handler;
+
+        if (queueCallback) {
+            serverHandler(queueCallback);
+            queueCallback = null;
+        }
+
+        function handler(callback) {
+            console.log("B: Starting heavy computation");
+            setTimeout(() => callback(42), 2000)
+        }
+    }
 }
 
-function secondTimeout() {
-    console.log("complicated.");
-    areThingsComplicated = true;
-
-    setTimeout(clearTimerInterval, 1000);
-}
-
-function clearTimerInterval() {
-    clearTimeout(timer);
-}
-
-function intervalLoop() {
-    if(areThingsComplicated) {
-        console.log("Oh no!");
+function sendNetworkRequest(callback) {
+    if(serverHandler) {
+        serverHandler(callback);
     } else {
-        console.log("What?");
+        queueCallback = callback;
     }
 }
