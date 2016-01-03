@@ -196,3 +196,34 @@ function delay(time) {
 
 
 ## Communicating Sequential Processes
+
+
+## Summary
+
+<center>
+    <table>
+        <tr>
+            <td></td>
+            <td>One</td>
+            <td>Multiple</td>
+        </tr>
+        <tr>
+            <td>Functional</td>
+            <td>
+                Callbacks</br>
+                Promises</br>
+            </td>
+            <td>
+                Reactive</br>Extensions
+            </td>
+        </tr>
+        <tr>
+            <td>Imperative</td>
+            <td>
+                Coroutines</br>
+                Async & Await</br>
+            </td>
+            <td>Communicating</br>Sequential</br>Processes</td>
+        </tr>
+    </table>
+</center>
