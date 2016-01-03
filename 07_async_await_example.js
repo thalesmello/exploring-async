@@ -5,7 +5,7 @@ var Promise = require("bluebird"),
     delay = Promise.delay,
     promisify = Promise.promisify,
     coroutine = Promise.coroutine,
-    aBootTime = 0,
+    aBootTime = 1000,
     bBootTime = 1000,
     promiseB;
 
