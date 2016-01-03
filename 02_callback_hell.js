@@ -1,5 +1,5 @@
-var aBootTime = 1000;
-    bBootTime = 1000;
+var aBootTime = 1000,
+    bBootTime = 1000,
     queueCallback = null,
     serverHandler = null;
 

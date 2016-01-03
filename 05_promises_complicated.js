@@ -1,47 +1,54 @@
-var areThingsComplicated = false,
-    timer = setInterval(intervalLoop, 500);
+var Promise = require("bluebird"),
+    aBootTime = 1000,
+    bBootTime = 1000,
+    promiseB;
 
-delay(2000, "First Return Value")
-    .then(debug(thingsCanGet))
-    .then(() => delay(1000, "Second Return Value"))
-    .then(debug(complicated))
-    .then(() => delay(1000, "Third Return Value"))
-    .then(debug(breakLoop));
+serverA();
+promiseB = serverB();
 
-function thingsCanGet(value) {
-    console.log("Things can get...");
-}
+function serverA() {
+    console.log("A: Booting up system...");
+    return Promise.delay(aBootTime)
+        .then(checkNetwork)
+        .delay(500)
+        .then(sendRequest);
 
-function complicated(value) {
-    console.log("complicated");
-    areThingsComplicated = true;
-}
+    setTimeout(checkNetwork, aBootTime);
 
-function breakLoop(value) {
-    clearInterval(timer);
-}
+    function checkNetwork() {
+        console.log("A: Checking network connection");
+    }
 
-function intervalLoop() {
-    if(areThingsComplicated) {
-        console.log("Not much though.");
-    } else {
-        console.log("What?");
+    function sendRequest() {
+        console.log("A: Request complex computation");
+        sendNetworkRequest(callback);
+    }
+
+    function callback(value) {
+        console.log("A: Computation returned " + value);
     }
 }
 
-function debug(func) {
-    return funcWithDebug;
+function serverB() {
+    console.log("B: Booting up system...")
 
-    function funcWithDebug(value) {
-        console.log("ARGUMENT -> " + value);
-        func(value);
+    return Promise.delay(bBootTime).then(listenRequests);
+
+    function listenRequests() {
+        console.log("B: Server up and running");
+        return serverHandler;
+    }
+
+    function serverHandler(callback) {
+        console.log("B: Starting heavy computation");
+        Promise.delay(2000).then(answerRequest);
+
+        function answerRequest() {
+            callback(42);
+        }
     }
 }
 
-function delay(time, value) {
-    return new Promise(handle);
-
-    function handle(resolve) {
-        return setTimeout(() => resolve(value), time);
-    }
+function sendNetworkRequest(callback) {
+    promiseB.then(serverHandler => serverHandler(callback));
 }

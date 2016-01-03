@@ -1,5 +1,5 @@
-var aBootTime = 1000;
-    bBootTime = 1000;
+var aBootTime = 1000,
+    bBootTime = 1000,
     queueCallback = null,
     serverHandler = null;
 
@@ -7,7 +7,7 @@ serverA();
 serverB();
 
 function serverA() {
-    console.log("A: Booting up system...")
+    console.log("A: Booting up system...");
     setTimeout(checkNetwork, aBootTime);
 
     function checkNetwork() {
@@ -18,10 +18,10 @@ function serverA() {
     function sendRequest() {
         console.log("A: Request complex computation");
         sendNetworkRequest(callback);
+    }
 
-        function callback(value) {
-            console.log("A: Computation returned " + value);
-        }
+    function callback(value) {
+        console.log("A: Computation returned " + value);
     }
 }
 
@@ -37,11 +37,11 @@ function serverB() {
             serverHandler(queueCallback);
             queueCallback = null;
         }
+    }
 
-        function handler(callback) {
-            console.log("B: Starting heavy computation");
-            setTimeout(() => callback(42), 2000)
-        }
+    function handler(callback) {
+        console.log("B: Starting heavy computation");
+        setTimeout(() => callback(42), 2000)
     }
 }
 
