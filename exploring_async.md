@@ -11,8 +11,8 @@ is called when the desired behavior is supposed to happen.
 setTimeout(() => console.log("Hello world!"), 1000);
 ```
 
-The problem with callbacks is that it can get messy really fast when you are
-trying to make more complex programs, which leads to the frequently called
+The problem here is that it can get messy really fast when you are
+trying to make more complex programs, which leads to the frequent problem
 callback hell.
 
 ```js
@@ -55,7 +55,16 @@ function sendRequest(callback) {
 }
 ```
 
-We can improve the situation here if we used named functions to control the flow.
+In the snippet above, we have servers A and B. As soon as server A boots up and
+checks its network connection, it sends a computation request to server B. Once
+the computation is done, server B responds to server A. Finally, server A prints
+the response to the screen. Because of the necessity for two different parts
+of the code to communicate with each other, we have global variables to share
+state among the two different servers. That, in turn, make it really complicated
+to follow up what's going on in the code, hence the callback hell.
+
+One possible way we can improve the code above is to improve the code is
+to name the callbacks and reduce the indentation level of the named functions.
 
 ```js
 var aBootTime = 1000,
@@ -114,17 +123,19 @@ function sendNetworkRequest(callback) {
 }
 ```
 
-It's now easier to follow what is happening in the code. The problem with it
-is that, each `setTimeout()` call is now coupled with the callback functions.
+Even though it's now easier to follow, there's a lot of room for improvement.
+For that, let's go ahead to the next technique in our agenda.
 
 ## Promises
 
 Promises are the solution preferred by the JavaScript community to avoid
 callback hell. It defines an API that handles asynchronous events elegantly.
 When you have a promise, you can pass a call `.then` passing in a callback
-function. But the function returns another promise with the return value of
-the previous callback. The advantage is that you can use it to chain callbacks,
-making it really simple to compose complicated behaviors.
+function for when the Promise is done with our computation.
+
+The key point here is that, in every `.then` function call, a new Promise is
+returned when the previous callback is done. That allows us to chain Promises
+together, so we can compose really complex behaviors.
 
 ```js
 new Promise(resolve => setTimeout(() => resolve("Hello World!"), 1000))
@@ -135,8 +146,8 @@ new Promise(resolve => setTimeout(() => resolve("Hello World!"), 1000))
     .then(value => console.log(value));
 ```
 
-The advantage of chaining callbacks this way is that it maintains a single
-indentation level.
+With this new trick up our sleeves, let's try to rewrite our previous server
+example.
 
 ```js
 var Promise = require("bluebird"),
