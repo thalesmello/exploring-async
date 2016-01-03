@@ -584,12 +584,12 @@ Please take notice these techniques aren't mutually exclusive.
 
 In my use cases, I'd probably adopt the following strategies:
 
-* In simple function calls, you are probably better off with callbacks
+* In simple function calls, I'm are probably better off with callbacks
 
-* When you have to deal with many different asynchronous returns, maybe
+* When I have to deal with many different asynchronous returns, maybe
   the way to go is to use Promises and tie them together with a Generator Coroutine
 
-* When you have sequences of events, be it a stream of positions of
+* When I have sequences of events, be it a stream of positions of
   the cursor on the screen, that's probably more easily handled with Reactive Extensions.
 
 * In any situation I would have to deal with mutable state, I'd probably
