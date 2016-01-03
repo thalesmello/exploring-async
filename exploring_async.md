@@ -321,7 +321,7 @@ very well supported in the JavaScript world.
 
 ## Reactive Extensions
 
-Also influenced by the C# community, Reactive Extensions, made available in
+Also influenced by the C# community, Reactive Extensions (Rx), made available in
 JavaScript through [Rx.js][2], it makes it possible to use enumerable higher
 order functions (such as map, filter and reduce) over streams of asynchronous
 events. It makes it a more appropriate tool for when you have to manipulate
@@ -423,6 +423,15 @@ API implementations across [many different languages][4], such as [Ruby][5], [Lu
 
 ## Communicating Sequential Processes
 
+Made popular by Go, this technique, CSP for short, has the concept of processes
+independent of each other which communicate solely by channels. The idea here is that,
+if a process tries to write to a channel and there is no other process reading from it,
+it blocks. If a process tries to read from a channel, but there is no other process to write
+to it, it blocks.
+
+The [js-csp][7] library manages to implement it in JavaScript by also making a smart use of
+generators. Let's see how our servers example looks like with it.
+
 ```js
 var aBootTime = 1000,
     bBootTime = 1000,
@@ -461,7 +470,25 @@ function* serverB() {
 }
 ```
 
+In the snippet above, each time we have a `yield csp.put`, we write to the channel.
+Each time we have a `yield csp.take`, we block execution until there is a value to
+read from. Diffenrently than the Generator Coroutines method, here we have a direct
+communication channel between the two servers. CSP makes the code looks like as if
+we are writing two completely different sequencial programs.
+
+Another advantage to this technique is that, because a channel is also a sequence
+of asynchronous data, you can also make use of enumerable higher order functions
+(map, filter, reduce, etc), albeit fewer higher order functions when compared to
+Reactive Extensions.
+
+
 ## Summary
+
+In this essay, we explored several different asynchronous programming techiniques
+which can be used in JavaScript. Some of them tend to be more functional, making
+heavier use of functions in order to abstract the code, whereas in others you
+you think more in an imperative manner. I guess a nice way to put it is in the table
+below.
 
 <center>
     <table>
@@ -491,9 +518,25 @@ function* serverB() {
     </table>
 </center>
 
+Please take notice these techniques aren't mutually exclusive.
+
+In my use cases, I'd probably adopt the following strategies:
+
+* In simple function calls, you are probably better off with callbacks
+
+* When you have to deal with many different asynchronous returns, maybe
+  the way to go is to use Promises and tie them together with a Generator Coroutine
+  
+* When you have sequences of events, be it a stream of positions of
+  the cursor on the screen, that's probably more easily handled with Reactive Extensions.
+  
+* In any situation I would have to deal with mutable state, I'd probably
+  be better off with CSP.
+
 [1]: http://bluebirdjs.com/
 [2]: https://github.com/Reactive-Extensions/RxJS
 [3]: http://www.introtorx.com/content/v1.0.10621.0/14_HotAndColdObservables.html
 [4]: http://reactivex.io/
 [5]: https://github.com/ReactiveX/RxRuby
 [6]: https://github.com/bjornbytes/RxLua
+[7]: https://github.com/ubolonton/js-csp
