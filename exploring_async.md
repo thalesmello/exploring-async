@@ -1,5 +1,11 @@
 # Exploring Async Techniques in JavaScript
 
+During the past few months, I've been exploring a few different techniques that
+can be use to write asynchronous programs. I'd like to share my experience via this essay.
+
+Even though we are using JavaScript for this, many of these techniques can be used
+in other languages with equivalent manners.
+
 ## Callbacks
 
 In the JavaScript world, this is the simplest form of asynchronous programming
@@ -472,9 +478,9 @@ function* serverB() {
 
 In the snippet above, each time we have a `yield csp.put`, we write to the channel.
 Each time we have a `yield csp.take`, we block execution until there is a value to
-read from. Diffenrently than the Generator Coroutines method, here we have a direct
+read from. Differently than the Generator Coroutines method, here we have a direct
 communication channel between the two servers. CSP makes the code looks like as if
-we are writing two completely different sequencial programs.
+we are writing two completely different sequential programs.
 
 Another advantage to this technique is that, because a channel is also a sequence
 of asynchronous data, you can also make use of enumerable higher order functions
@@ -484,7 +490,7 @@ Reactive Extensions.
 
 ## Summary
 
-In this essay, we explored several different asynchronous programming techiniques
+In this essay, we explored several different asynchronous programming techniques
 which can be used in JavaScript. Some of them tend to be more functional, making
 heavier use of functions in order to abstract the code, whereas in others you
 you think more in an imperative manner. I guess a nice way to put it is in the table
@@ -526,10 +532,10 @@ In my use cases, I'd probably adopt the following strategies:
 
 * When you have to deal with many different asynchronous returns, maybe
   the way to go is to use Promises and tie them together with a Generator Coroutine
-  
+
 * When you have sequences of events, be it a stream of positions of
   the cursor on the screen, that's probably more easily handled with Reactive Extensions.
-  
+
 * In any situation I would have to deal with mutable state, I'd probably
   be better off with CSP.
 
