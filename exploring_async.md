@@ -1,7 +1,7 @@
 # Exploring Async Techniques in JavaScript
 
 During the past few months, I've been exploring a few different techniques that
-can be use to write asynchronous programs. I'd like to share my experience via this essay.
+can be used to write asynchronous programs. I'd like to share my experience via this essay.
 
 Even though we are using JavaScript for this, many of these techniques can be used
 in other languages with equivalent manners.
