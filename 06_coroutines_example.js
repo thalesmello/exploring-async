@@ -1,35 +1,37 @@
 var Promise = require("bluebird"),
     delay = Promise.delay,
-    timer = setInterval(intervalLoop, 500),
-    areThingsComplicated = false;
+    sendNetworkRequestAsync = Promise.promisify(sendNetworkRequest),
+    coroutine = Promise.coroutine,
+    aBootTime = 1000,
+    bBootTime = 1000,
+    promiseB;
 
-Promise.coroutine(complicatedBehaviour)();
+coroutine(serverA)();
+promiseB = coroutine(serverB)();
 
-function* complicatedBehaviour() {
-    var value;
-
-    value = yield delay(2000, "First Return Value");
-    logArgument(value);
-    console.log("Things can get...");
-
-    value = yield delay(1000, "Second Return Value");
-    logArgument(value);
-    areThingsComplicated = true;
-    console.log("complicated.");
-
-    value = yield delay(1000, "Third Return Value");
-    logArgument(value);
-    clearInterval(timer);
+function* serverA() {
+    console.log("A: Booting up system...");
+    yield delay(aBootTime);
+    console.log("A: Checking network connection");
+    yield delay(500);
+    console.log("A: Request complex computation");
+    var value = yield sendNetworkRequestAsync();
+    console.log("A: Computation returned " + value);
 }
 
-function logArgument(value) {
-    console.log("ARGUMENT -> " + value);
-}
+function* serverB() {
+    console.log("B: Booting up system...")
+    yield delay(bBootTime);
+    console.log("B: Server up and running");
+    return coroutine(serverHandler);
 
-function intervalLoop() {
-    if(areThingsComplicated) {
-        console.log("Not much");
-    } else {
-        console.log("What?");
+    function* serverHandler(callback) {
+        console.log("B: Starting heavy computation");
+        yield delay(2000);
+        callback(null, 42);
     }
+}
+
+function sendNetworkRequest(callback) {
+    promiseB.then(serverHandler => serverHandler(callback));
 }
