@@ -147,7 +147,9 @@ new Promise(resolve => setTimeout(() => resolve("Hello World!"), 1000))
 ```
 
 With this new trick up our sleeves, let's try to rewrite our previous server
-example.
+example, but making use of the [Bluebird][1] library, which is an efficient
+implementation of Promises that has several support methods which we are going
+to use in these examples.
 
 ```js
 var Promise = require("bluebird"),
@@ -206,13 +208,19 @@ function sendNetworkRequest(callback) {
 }
 ```
 
-## Coroutines
+Notice that, in the snippet above, we've removed the shared state between
+the servers. Previously, it was used to keep track of which server was up and
+running. Because Promises can simple callback once it's done with its
+computation, the need for shared state went away.
 
-The coroutines technique is makes a smart use of the new generator feature
-in the ES6 specification. Generators make it possible to suspend and resume
-function execution. Some libraries such as Bluebird make use of it in order
-to provide a convenient way to await the return of promises. Our previous
-example become a lot simpler once we make use of the coroutine feature.
+## Generator Coroutines
+
+The generator coroutines technique makes a smart use of the new generator feature
+of the ES6 specification. Generators make it possible to suspend and resume
+function execution. [Bluebird][1] uses it to provide a convenient way to
+await the return of promises, almost as if it was a synchronous function call.
+Our previous example become a lot simpler once we make use of the coroutine
+feature.
 
 ```js
 var Promise = require("bluebird"),
@@ -251,7 +259,20 @@ function* serverB() {
 }
 ```
 
+In the snippet above, the `coroutine` function takes in a generator `function*`,
+which makes it possible to `yield` promises, get their response, and resume
+the function from where it left off. Notice that it manages to describe our
+problem with a greater simplicity, almost as if we were writing a synchronous
+program.
+
 ## Async & Await
+
+Inspired by C#, the Async & Await is currently a proposal for the ES7
+specification, and it's syntax is experimental. It might change upon final
+release. Nevertheless, it consists of the same idea of the Generator Coroutines method.
+Inside an function marked with the `async` keyword, you're able to `await` the
+result of Promises, such that you have a very similar structure to the
+previous technique.
 
 ```js
 var Promise = require("bluebird"),
@@ -290,7 +311,21 @@ async function serverB() {
 }
 ```
 
+When you compare the snippet above with the previous example, you notice the
+syntax is a little cleaner, which is to be expected as that's the use case for
+which `async` and `await` were designed, whereas Generators were originally
+designed to generate enumerable values in a lazy manner. However, because this
+feature is currently experimental, you are better off using the Generator Coroutines
+technique in your projects, as you only require generators, which are already
+very well supported in the JavaScript world.
+
 ## Reactive Extensions
+
+Also influenced by the C# community, Reactive Extensions, made available in
+JavaScript through [Rx.js][2], it makes it possible to use enumerable higher
+order functions (such as map, filter and reduce) over streams of asynchronous
+events. It makes it a more appropriate tool for when you have to manipulate
+several asynchronous events at once.  
 
 ```js
 var Rx = require("rx");
@@ -302,6 +337,13 @@ Rx.Observable
     .concat(Rx.Observable.of("World"))
     .subscribe(x => console.log("Hello " + x + "!"));
 ```
+
+In the snippet above, we make use of `map`, `takeWhile` and `concat` just as
+if we were working with an array. The difference here is that the events
+happen over time.
+
+Now, we are going to try to make use of Reactive Extensions to implement our
+server communication example.
 
 ```js
 var Promise = require("bluebird"),
@@ -362,6 +404,22 @@ function sendNetworkRequest(callback) {
     observableB.subscribe(serverHandler => serverHandler(callback));
 }
 ```
+
+In the snippet above, we make use of an AsyncSubject in order for the Observable
+result to be readily available when we subscribe to it. If you want to learn
+more about it, please read about [Hot and Cold observables][3].
+
+From the snippet above, we notice the implementation is a lot more complicated
+than the Generator Coroutine version, and slightly more complicated than the
+Promises version. It happens because this isn't the most appropriate technique
+to solve our problem, as we are dealing with with several types of non repeating
+asynchronous events, as opposed to fewer types of repeating events.
+
+So, it might be worth it to learn Reactive Extensions because there will be
+situations in which your problem will be more easily solved by Promises,
+whereas others will have simpler solutions with Reactive Extensions. Another
+advantage of learning Reactive Extensions is that it has a relatively uniform
+API implementations across [many different languages][4], such as [Ruby][5], [Lua][6].
 
 ## Communicating Sequential Processes
 
@@ -425,10 +483,17 @@ function* serverB() {
         <tr>
             <td>Imperative</td>
             <td>
-                Coroutines</br>
+                Generator Coroutines</br>
                 Async & Await</br>
             </td>
             <td>Communicating</br>Sequential</br>Processes</td>
         </tr>
     </table>
 </center>
+
+[1]: http://bluebirdjs.com/
+[2]: https://github.com/Reactive-Extensions/RxJS
+[3]: http://www.introtorx.com/content/v1.0.10621.0/14_HotAndColdObservables.html
+[4]: http://reactivex.io/
+[5]: https://github.com/ReactiveX/RxRuby
+[6]: https://github.com/bjornbytes/RxLua
