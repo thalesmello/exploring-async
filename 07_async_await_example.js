@@ -3,9 +3,9 @@
 
 var Promise = require("bluebird"),
     delay = Promise.delay,
-    sendNetworkRequestAsync = Promise.promisify(sendNetworkRequest),
+    promisify = Promise.promisify,
     coroutine = Promise.coroutine,
-    aBootTime = 1000,
+    aBootTime = 0,
     bBootTime = 1000,
     promiseB;
 
@@ -18,7 +18,8 @@ async function serverA() {
     console.log("A: Checking network connection");
     await delay(500);
     console.log("A: Request complex computation");
-    var value = await sendNetworkRequestAsync();
+    var serverHandler = await promiseB;
+    var value = await serverHandler();
     console.log("A: Computation returned " + value);
 }
 
@@ -26,15 +27,11 @@ async function serverB() {
     console.log("B: Booting up system...")
     await delay(bBootTime);
     console.log("B: Server up and running");
-    return serverHandler;
+    return promisify(serverHandler);
 
     async function serverHandler(callback) {
         console.log("B: Starting heavy computation");
         await delay(2000);
         callback(null, 42);
     }
-}
-
-function sendNetworkRequest(callback) {
-    promiseB.then(serverHandler => serverHandler(callback));
 }
