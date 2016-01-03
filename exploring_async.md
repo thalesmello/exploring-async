@@ -15,6 +15,7 @@ is called when the desired behavior is supposed to happen.
 
 ```js
 setTimeout(() => console.log("Hello world!"), 1000);
+// Hello world!
 ```
 
 The problem here is that it can get messy really fast when you are
@@ -59,6 +60,13 @@ function sendRequest(callback) {
         queueCallback = callback;
     }
 }
+// A: Booting up system...
+// B: Booting up system...
+// A: Checking network connection
+// B: Server up and running
+// A: Request complex computation
+// B: Starting heavy computation
+// A: Computation returned 42
 ```
 
 In the snippet above, we have servers A and B. As soon as server A boots up and
@@ -127,6 +135,13 @@ function sendNetworkRequest(callback) {
         queueCallback = callback;
     }
 }
+// A: Booting up system...
+// B: Booting up system...
+// A: Checking network connection
+// B: Server up and running
+// A: Request complex computation
+// B: Starting heavy computation
+// A: Computation returned 42
 ```
 
 Even though it's now easier to follow, there's a lot of room for improvement.
@@ -150,6 +165,8 @@ new Promise(resolve => setTimeout(() => resolve("Hello World!"), 1000))
         return new Promise(resolve => setTimeout(() => resolve("I'll be back"), 1000));
     })
     .then(value => console.log(value));
+// Value!
+// I'll be back
 ```
 
 With this new trick up our sleeves, let's try to rewrite our previous server
@@ -212,6 +229,13 @@ function serverB() {
 function sendNetworkRequest(callback) {
     promiseB.then(serverHandler => serverHandler(callback));
 }
+// A: Booting up system...
+// B: Booting up system...
+// A: Checking network connection
+// B: Server up and running
+// A: Request complex computation
+// B: Starting heavy computation
+// A: Computation returned 42
 ```
 
 Notice that, in the snippet above, we've removed the shared state between
@@ -263,6 +287,13 @@ function* serverB() {
         callback(null, 42);
     }
 }
+// A: Booting up system...
+// B: Booting up system...
+// A: Checking network connection
+// B: Server up and running
+// A: Request complex computation
+// B: Starting heavy computation
+// A: Computation returned 42
 ```
 
 In the snippet above, the `coroutine` function takes in a generator `function*`,
@@ -315,6 +346,13 @@ async function serverB() {
         callback(null, 42);
     }
 }
+// A: Booting up system...
+// B: Booting up system...
+// A: Checking network connection
+// B: Server up and running
+// A: Request complex computation
+// B: Starting heavy computation
+// A: Computation returned 42
 ```
 
 When you compare the snippet above with the previous example, you notice the
@@ -342,6 +380,10 @@ Rx.Observable
     .takeWhile(x => x <= 3)
     .concat(Rx.Observable.of("World"))
     .subscribe(x => console.log("Hello " + x + "!"));
+// Hello 1!
+// Hello 2!
+// Hello 3!
+// Hello World!
 ```
 
 In the snippet above, we make use of `map`, `takeWhile` and `concat` just as
@@ -409,6 +451,13 @@ function serverB() {
 function sendNetworkRequest(callback) {
     observableB.subscribe(serverHandler => serverHandler(callback));
 }
+// A: Booting up system...
+// B: Booting up system...
+// A: Checking network connection
+// B: Server up and running
+// A: Request complex computation
+// B: Starting heavy computation
+// A: Computation returned 42
 ```
 
 In the snippet above, we make use of an AsyncSubject in order for the Observable
@@ -474,6 +523,13 @@ function* serverB() {
         yield csp.put(network, 42);
     };
 }
+// A: Booting up system...
+// B: Booting up system...
+// A: Checking network connection
+// B: Server up and running
+// A: Request complex computation
+// B: Starting heavy computation
+// A: Computation returned 42
 ```
 
 In the snippet above, each time we have a `yield csp.put`, we write to the channel.
