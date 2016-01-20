@@ -584,7 +584,7 @@ Please take notice these techniques aren't mutually exclusive.
 
 In my use cases, I'd probably adopt the following strategies:
 
-* In simple function calls, I'm are probably better off with callbacks
+* In simple function calls, I'm probably better off with callbacks
 
 * When I have to deal with many different asynchronous returns, maybe
   the way to go is to use Promises and tie them together with a Generator Coroutine
