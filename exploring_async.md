@@ -304,7 +304,7 @@ program.
 
 ## Async & Await
 
-Inspired by C#, the Async & Await is currently a proposal for the ES7
+Inspired by C#, the Async & Await is currently a proposal for the ES2016
 specification, and it's syntax is experimental. It might change upon final
 release. Nevertheless, it consists of the same idea of the Generator Coroutines method.
 Inside an function marked with the `async` keyword, you're able to `await` the
